@@ -1,0 +1,1 @@
+nRF52_ble_tempalte
