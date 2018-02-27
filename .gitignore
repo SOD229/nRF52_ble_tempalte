@@ -1,0 +1,5 @@
+#Excluir archivos de compilación
+/_build/*
+
+#Excluir archivos de configuración visual studio code
+/.vscode/*

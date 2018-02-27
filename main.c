@@ -87,6 +87,8 @@ static void led_write_handler(BlueStack_Characteristic_t * p_char, uint8_t* data
     BlueStack_ServiceRead(my_service_id, &chars[0], data, 1);
 }
 
+/** Función de inicialización de Servicios BLE
+ */
 void services_init(){
 
     BlueStack_Service_t my_service;
@@ -116,11 +118,14 @@ void services_init(){
 }
 
 
+/**
+ * Eventos BLE de usuario
+ */
 void usr_on_ble_event(ble_evt_t const * p_ble_evt, void * p_context)
 {
     switch (p_ble_evt->header.evt_id)
     {
-        case BLE_GAP_EVT_CONNECTED:
+        case BLE_GAP_EVT_CONNECTED: //Evento de conexión
             app_timer_stop(advertising_led_timer_id);
             for(int i= 0; i < 10; i++)
             {
@@ -131,7 +136,7 @@ void usr_on_ble_event(ble_evt_t const * p_ble_evt, void * p_context)
             }
         break;
 
-        case BLE_GAP_EVT_DISCONNECTED:
+        case BLE_GAP_EVT_DISCONNECTED: //Evento de desconexión
             bs_advertising_start();
             app_timer_start(advertising_led_timer_id, ADVERTISING_LED_INTERVAL, NULL);
         break;
@@ -149,18 +154,22 @@ int main(void)
     leds_init();
     timers_init();
     
-    bs_cfg.dev_name               = "nRF52_BS_Template";
-    bs_cfg.adv_uuid.uuid          = 0;                                        // UUID a mostar en el Advertising
-    bs_cfg.adv_uuid.type          = BLE_UUID_TYPE_BLE;                        // Tipo del dispositivo
-    bs_cfg.adv_interval           = 100;                                      // Intervalo del Advertising en unidades de 0.625 ms
-    bs_cfg.adv_timeout            = 180;                                      // Tiempo de espera del Advertising. (tiempo de visibilidad)
+    bs_cfg.dev_name               = "nRF52_BS_Template"; //Nombre del dispositivo
+    bs_cfg.adv_uuid.uuid          = 0;                   // UUID a mostar en el Advertising
+    bs_cfg.adv_uuid.type          = BLE_UUID_TYPE_BLE;   // Tipo del dispositivo
+    bs_cfg.adv_interval           = 100;                 // Intervalo del Advertising en unidades de 0.625 ms
+    bs_cfg.adv_timeout            = 180;                 // Tiempo de espera del Advertising. (tiempo de visibilidad)
     bs_cfg.usr_ble_evt           = usr_on_ble_event;
     bs_cfg.usr_conn_params_err_h = NULL;
     bs_cfg.usr_conn_params_evt   = NULL;
-    bs_init(&bs_cfg);
-    services_init();
-    bs_advertising_start();
+    
+    bs_init(&bs_cfg);   //Inicialización de BLE
+    services_init();    //Inicialización de Servicios BLE
+    bs_advertising_start(); //Inicio de advertising
+    //Inicio de timer para led de advertising
     app_timer_start(advertising_led_timer_id, ADVERTISING_LED_INTERVAL, NULL);
+    
+    //Manejo de energía, ciclo infinito de ejecución del firmware
     for (;;) { bs_power_manage(); }
 }
 
